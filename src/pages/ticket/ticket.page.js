@@ -81,8 +81,19 @@ const Ticket = () => {
     const { _id, ...ticketDataWithoutId } = ticketData;
 
     try {
+      const token = localStorage.getItem('token'); // Get the JWT token
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      };
       // Send POST request to backend
-      const response = await axios.post('http://localhost:5000/api/tickets', ticketDataWithoutId);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/tickets`,
+        ticketDataWithoutId,
+        config // Pass the config with headers
+      );
       console.log('Ticket created:', response.data);
 
       toast.success('Ticket submitted successfully!', { duration: 5000 });

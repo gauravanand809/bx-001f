@@ -26,18 +26,43 @@ const Login = () => {
     }
 
     try {
+      console.log('Login attempt with formData:', formData);
+      const payload = {
+        email: formData.email.trim(),
+        password: formData.password,
+      };
+      console.log('Sending payload to /api/users/login:', payload);
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/users/login`,
-        {
-          email: formData.email.trim(),
-          password: formData.password,
-        },
+        payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      localStorage.setItem('token', response.data.token);
-      navigate('/ticket');
+      console.log('Login API response received:', response);
+      console.log('Response data:', response.data);
+      console.log('Token from response.data.token:', response.data?.token);
+
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        console.log('Token set in localStorage. Value:', localStorage.getItem('token'));
+        navigate('/ticket');
+      } else {
+        console.error('Token not found in response data or response.data is undefined.');
+        toast.error('Login successful, but token was not received from server.');
+      }
     } catch (err) {
+      console.error('Login API error:', err);
+      if (err.response) {
+        console.error('Error response data:', err.response.data);
+        console.error('Error response status:', err.response.status);
+        console.error('Error response headers:', err.response.headers);
+      } else if (err.request) {
+        console.error('Error request data:', err.request);
+      } else {
+        console.error('Error message:', err.message);
+      }
+
       if (err.response?.status === 401) {
         toast.error('Incorrect password. Please try again.', { duration: 5000 });
       } else {

@@ -12,8 +12,12 @@ const QueryDetails = () => {
   const [comment, setComment] = useState('');
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
     console.log('Fetching ticket details for ID:', id); // Debug log
-    axios.get(`/api/tickets/${id}`)
+    axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/tickets/${id}`, config)
       .then(response => {
         console.log('Ticket details fetched successfully:', response.data); // Debug log
         setTicket(response.data);
@@ -21,14 +25,19 @@ const QueryDetails = () => {
       })
       .catch(error => {
         console.error('Error fetching ticket details:', error);
+        toast.error('Failed to fetch ticket details.');
       });
   }, [id]);
 
   const handleCloseTicket = () => {
-    axios.put(`/api/tickets/${id}/close`)
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+    axios.put(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/tickets/${id}/close`, {}, config)
       .then(() => {
         toast.success('Ticket has been closed successfully.', { duration: 5000 });
-        setTicket({ ...ticket, status: 'Closed' });
+        setTicket(prevTicket => ({ ...prevTicket, status: 'Closed' }));
       })
       .catch(error => {
         console.error('Error closing the ticket:', error);
@@ -37,7 +46,14 @@ const QueryDetails = () => {
   };
 
   const handleSaveComment = () => {
-    axios.put(`/api/tickets/${id}/comment`, { adminComment: comment })
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios.put(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/tickets/${id}/comment`, { adminComment: comment }, config)
       .then(() => {
         toast.success('Comment saved successfully.', { duration: 5000 });
       })

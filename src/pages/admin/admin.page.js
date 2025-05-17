@@ -9,12 +9,17 @@ const Admin = () => {
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/tickets?limit=10&sort=-createdAt')
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+    axios.get(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/tickets?limit=10&sort=-createdAt`, config)
       .then(response => {
         setTickets(response.data);
       })
       .catch(error => {
         console.error('Error fetching tickets:', error);
+
       });
   }, []);
 
